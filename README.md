@@ -11,6 +11,8 @@ ketik onecompiler.com
 
 pilih html
 
+hapus semua kode yg ada di onecompiler.com
+
 paste semua kode yg sudah di copy tadi
 
 klik run
