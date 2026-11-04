@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Bayangan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #e94560;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #e94560;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 25px;
+            font-size: 0.9em;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            color: #e94560;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(233, 69, 96, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            color: #fff;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #e94560;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-row input {
+            flex: 1;
+        }
+
+        .unit {
+            color: #aaa;
+            font-size: 0.85em;
+            min-width: 40px;
+        }
+
+        .info-box {
+            background: rgba(233, 69, 96, 0.1);
+            border-left: 4px solid #e94560;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 0.85em;
+            color: #ddd;
+        }
+
+        .btn-calculate {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #e94560, #c73e54);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+        }
+
+        .results {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        .result-value {
+            color: #e94560;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .compass-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .compass {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .compass-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .shadow-arrow {
+            transform-origin: center;
+            transition: transform 0.5s ease;
+        }
+
+        .formula-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-size: 0.8em;
+            color: #888;
+        }
+
+        .formula-box h4 {
+            color: #e94560;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>☀️ Kalkulator Bayangan</h1>
+        <p class="subtitle">Hitung panjang dan arah bayangan tongkat 1 meter</p>
+
+        <div class="info-box">
+            <strong>Catatan:</strong> Kalkulator ini menggunakan posisi matahari pada jam 12:00 siang waktu setempat (matahari di titik tertinggi). 
+            Arah 0° = Utara, 90° = Timur, 180° = Selatan, 270° = Barat.
+        </div>
+
+        <div class="grid">
+            <div class="input-group">
+                <label for="latitude">Lintang (Latitude)</label>
+                <div class="input-row">
+                    <input type="number" id="latitude" step="0.01" min="-90" max="90" placeholder="-90 sampai 90" value="-6.2">
+                    <span class="unit">°</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="longitude">Bujur (Longitude)</label>
+                <div class="input-row">
+                    <input type="number" id="longitude" step="0.01" min="-180" max="180" placeholder="-180 sampai 180" value="106.8">
+                    <span class="unit">°</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="declination">Deklinasi Matahari (δ)</label>
+                <div class="input-row">
+                    <input type="number" id="declination" step="0.01" min="-23.45" max="23.45" placeholder="-23.45 sampai 23.45" value="-15">
+                    <span class="unit">°</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="stickHeight">Tinggi Tongkat</label>
+                <div class="input-row">
+                    <input type="number" id="stickHeight" step="0.01" min="0.1" max="10" value="1">
+                    <span class="unit">m</span>
+                </div>
+            </div>
+
+            <div class="input-group full-width">
+                <label for="hourAngle">Sudut Jam Matahari (ω) - Posisi Harian</label>
+                <div class="input-row">
+                    <input type="number" id="hourAngle" step="0.1" min="-180" max="180" value="0" placeholder="0 = jam 12 siang">
+                    <span class="unit">°</span>
+                </div>
+                <small style="color: #888; font-size: 0.8em;">0° = jam 12 siang (matahari di titik tertinggi), negatif = pagi, positif = sore</small>
+            </div>
+        </div>
+
+        <button class="btn-calculate" onclick="calculateShadow()">🔍 Hitung Bayangan</button>
+
+        <div class="results" id="results">
+            <h3 style="text-align: center; color: #e94560; margin-bottom: 15px;">📊 Hasil Perhitungan</h3>
+            
+            <div class="result-item">
+                <span class="result-label">☀️ Ketinggian Matahari (Alt)</span>
+                <span class="result-value" id="sunAltitude">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">🧭 Azimut Matahari (dari Utara)</span>
+                <span class="result-value" id="sunAzimuth">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">📏 Panjang Bayangan</span>
+                <span class="result-value" id="shadowLength">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">🧭 Arah Bayangan (0° = Utara)</span>
+                <span class="result-value" id="shadowDirection">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">📐 Sudut Zenith Matahari</span>
+                <span class="result-value" id="zenithAngle">-</span>
+            </div>
+
+            <div class="compass-container">
+                <h4 style="color: #e94560; margin-bottom: 10px;">🧭 Kompas Arah Bayangan</h4>
+                <div class="compass">
+                    <svg class="compass-svg" viewBox="0 0 200 200">
+                        <!-- Lingkaran kompas -->
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="#e94560" stroke-width="2"/>
+                        <circle cx="100" cy="100" r="85" fill="none" stroke="#e94560" stroke-width="0.5" opacity="0.3"/>
+                        
+                        <!-- Garis arah -->
+                        <line x1="100" y1="20" x2="100" y2="35" stroke="#e94560" stroke-width="2"/>
+                        <line x1="100" y1="180" x2="100" y2="165" stroke="#555" stroke-width="1"/>
+                        <line x1="20" y1="100" x2="35" y2="100" stroke="#555" stroke-width="1"/>
+                        <line x1="180" y1="100" x2="165" y2="100" stroke="#555" stroke-width="1"/>
+                        
+                        <!-- Label arah -->
+                        <text x="100" y="15" text-anchor="middle" fill="#e94560" font-size="14" font-weight="bold">N</text>
+                        <text x="100" y="195" text-anchor="middle" fill="#555" font-size="12">S</text>
+                        <text x="15" y="104" text-anchor="middle" fill="#555" font-size="12">W</text>
+                        <text x="185" y="104" text-anchor="middle" fill="#555" font-size="12">E</text>
+                        
+                        <!-- Tick marks -->
+                        <g id="ticks"></g>
+                        
+                        <!-- Panah bayangan -->
+                        <g id="shadowArrow" class="shadow-arrow">
+                            <line x1="100" y1="100" x2="100" y2="30" stroke="#00ff88" stroke-width="4" marker-end="url(#arrowhead)"/>
+                            <circle cx="100" cy="100" r="5" fill="#00ff88"/>
+                        </g>
+                        
+                        <!-- Definisi marker panah -->
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="#00ff88"/>
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                <p style="color: #00ff88; margin-top: 10px; font-size: 0.9em;">⬆️ Panah hijau menunjukkan arah bayangan</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>📐 Rumus yang Digunakan:</h4>
+                <p><strong>Ketinggian Matahari (Alt):</strong> sin(Alt) = sin(φ) × sin(δ) + cos(φ) × cos(δ) × cos(ω)</p>
+                <p><strong>Azimut Matahari:</strong> cos(Az) = (sin(δ) - sin(φ) × sin(Alt)) / (cos(φ) × cos(Alt))</p>
+                <p><strong>Panjang Bayangan:</strong> L = h × cot(Alt) = h / tan(Alt)</p>
+                <p><strong>Arah Bayangan:</strong> Bayangan berlawanan dengan arah matahari (Azimut + 180°)</p>
+                <p style="margin-top: 10px; color: #666;">
+                    φ = Lintang | δ = Deklinasi | ω = Sudut Jam | h = Tinggi tongkat
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Membuat tick marks pada kompas
+        function createTicks() {
+            const ticksGroup = document.getElementById('ticks');
+            for (let i = 0; i < 360; i += 15) {
+                const angle = (i - 90) * Math.PI / 180;
+                const r1 = i % 90 === 0 ? 80 : 85;
+                const r2 = 90;
+                const x1 = 100 + r1 * Math.cos(angle);
+                const y1 = 100 + r1 * Math.sin(angle);
+                const x2 = 100 + r2 * Math.cos(angle);
+                const y2 = 100 + r2 * Math.sin(angle);
+                
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x1);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+                line.setAttribute('stroke', i % 90 === 0 ? '#e94560' : '#555');
+                line.setAttribute('stroke-width', i % 90 === 0 ? '2' : '1');
+                ticksGroup.appendChild(line);
+            }
+        }
+        createTicks();
+
+        function toRad(deg) {
+            return deg * Math.PI / 180;
+        }
+
+        function toDeg(rad) {
+            return rad * 180 / Math.PI;
+        }
+
+        function calculateShadow() {
+            // Ambil nilai input
+            const lat = parseFloat(document.getElementById('latitude').value);
+            const lon = parseFloat(document.getElementById('longitude').value);
+            const declination = parseFloat(document.getElementById('declination').value);
+            const stickHeight = parseFloat(document.getElementById('stickHeight').value);
+            const hourAngle = parseFloat(document.getElementById('hourAngle').value);
+
+            // Validasi input
+            if (isNaN(lat) || isNaN(declination) || isNaN(stickHeight) || isNaN(hourAngle)) {
+                alert('Mohon isi semua field dengan nilai yang valid!');
+                return;
+            }
+
+            // Konversi ke radian
+            const phi = toRad(lat);
+            const delta = toRad(declination);
+            const omega = toRad(hourAngle);
+
+            // ============================================
+            // RUMUS ASTRONOMI UNTUK POSISI MATAHARI
+            // ============================================
+
+            // 1. Hitung ketinggian matahari (Altitude/Alt)
+            // sin(Alt) = sin(φ) × sin(δ) + cos(φ) × cos(δ) × cos(ω)
+            const sinAlt = Math.sin(phi) * Math.sin(delta) + Math.cos(phi) * Math.cos(delta) * Math.cos(omega);
+            const alt = Math.asin(sinAlt);
+            const altDeg = toDeg(alt);
+
+            // 2. Hitung azimut matahari (dari Utara, searah jarum jam)
+            // cos(Az) = (sin(δ) - sin(φ) × sin(Alt)) / (cos(φ) × cos(Alt))
+            let azimuth;
+            const cosAz = (Math.sin(delta) - Math.sin(phi) * sinAlt) / (Math.cos(phi) * Math.cos(alt));
+            
+            // Clamp cosAz ke [-1, 1] untuk menghindari error numerik
+            const clampedCosAz = Math.max(-1, Math.min(1, cosAz));
+            
+            if (omega < 0) {
+                // Pagi: matahari di timur
+                azimuth = Math.acos(clampedCosAz);
+            } else {
+                // Sore: matahari di barat
+                azimuth = 2 * Math.PI - Math.acos(clampedCosAz);
+            }
+            
+            // Jika jam 12 tepat (omega = 0)
+            if (Math.abs(omega) < 0.0001) {
+                if (lat > declination) {
+                    // Matahari di selatan untuk belahan bumi utara
+                    azimuth = Math.PI;
+                } else {
+                    // Matahari di utara untuk belahan bumi selatan
+                    azimuth = 0;
+                }
+            }
+
+            const azimuthDeg = toDeg(azimuth);
+
+            // ============================================
+            // HITUNG BAYANGAN
+            // ============================================
+
+            // 3. Hitung panjang bayangan
+            // L = h / tan(Alt) = h × cot(Alt)
+            let shadowLength;
+            if (altDeg <= 0) {
+                shadowLength = Infinity; // Matahari di bawah horizon
+            } else {
+                shadowLength = stickHeight / Math.tan(alt);
+            }
+
+            // 4. Hitung arah bayangan (berlawanan dengan arah matahari)
+            // Bayangan selalu menunjuk ke arah berlawanan dengan matahari
+            let shadowDirection = azimuthDeg + 180;
+            if (shadowDirection >= 360) {
+                shadowDirection -= 360;
+            }
+
+            // 5. Hitung sudut zenith
+            const zenith = 90 - altDeg;
+
+            // ============================================
+            // TAMPILKAN HASIL
+            // ============================================
+
+            document.getElementById('results').classList.add('show');
+
+            // Ketinggian matahari
+            document.getElementById('sunAltitude').textContent = altDeg.toFixed(2) + '°';
+
+            // Azimut matahari
+            let azimuthText = azimuthDeg.toFixed(2) + '°';
+            if (azimuthDeg >= 337.5 || azimuthDeg < 22.5) azimuthText += ' (Utara)';
+            else if (azimuthDeg >= 22.5 && azimuthDeg < 67.5) azimuthText += ' (Timur Laut)';
+            else if (azimuthDeg >= 67.5 && azimuthDeg < 112.5) azimuthText += ' (Timur)';
+            else if (azimuthDeg >= 112.5 && azimuthDeg < 157.5) azimuthText += ' (Tenggara)';
+            else if (azimuthDeg >= 157.5 && azimuthDeg < 202.5) azimuthText += ' (Selatan)';
+            else if (azimuthDeg >= 202.5 && azimuthDeg < 247.5) azimuthText += ' (Barat Daya)';
+            else if (azimuthDeg >= 247.5 && azimuthDeg < 292.5) azimuthText += ' (Barat)';
+            else if (azimuthDeg >= 292.5 && azimuthDeg < 337.5) azimuthText += ' (Barat Laut)';
+            document.getElementById('sunAzimuth').textContent = azimuthText;
+
+            // Panjang bayangan
+            if (shadowLength === Infinity || shadowLength > 1000) {
+                document.getElementById('shadowLength').textContent = '∞ (Matahari terbenam)';
+            } else {
+                document.getElementById('shadowLength').textContent = shadowLength.toFixed(3) + ' m';
+            }
+
+            // Arah bayangan
+            let shadowText = shadowDirection.toFixed(2) + '°';
+            if (shadowDirection >= 337.5 || shadowDirection < 22.5) shadowText += ' (Utara)';
+            else if (shadowDirection >= 22.5 && shadowDirection < 67.5) shadowText += ' (Timur Laut)';
+            else if (shadowDirection >= 67.5 && shadowDirection < 112.5) shadowText += ' (Timur)';
+            else if (shadowDirection >= 112.5 && shadowDirection < 157.5) shadowText += ' (Tenggara)';
+            else if (shadowDirection >= 157.5 && shadowDirection < 202.5) shadowText += ' (Selatan)';
+            else if (shadowDirection >= 202.5 && shadowDirection < 247.5) shadowText += ' (Barat Daya)';
+            else if (shadowDirection >= 247.5 && shadowDirection < 292.5) shadowText += ' (Barat)';
+            else if (shadowDirection >= 292.5 && shadowDirection < 337.5) shadowText += ' (Barat Laut)';
+            document.getElementById('shadowDirection').textContent = shadowText;
+
+            // Sudut zenith
+            document.getElementById('zenithAngle').textContent = zenith.toFixed(2) + '°';
+
+            // Update panah kompas
+            const arrow = document.getElementById('shadowArrow');
+            // Rotasi panah sesuai arah bayangan (dari utara, searah jarum jam)
+            // SVG rotasi berlawanan arah jarum jam, jadi kita negasi
+            arrow.style.transform = `rotate(${-shadowDirection}deg)`;
+        }
+
+        // Auto-calculate saat halaman dimuat dengan nilai default
+        window.addEventListener('load', calculateShadow);
+    </script>
+</body>
+</html>
